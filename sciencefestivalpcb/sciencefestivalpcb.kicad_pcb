@@ -80,9 +80,9 @@
       (plotinvisibletext false)
       (sketchpadsonfab false)
       (subtractmaskfromsilk false)
-      (outputformat 1)
+      (outputformat 4)
       (mirror false)
-      (drillshape 1)
+      (drillshape 0)
       (scaleselection 1)
       (outputdirectory "")
     )
@@ -1034,9 +1034,9 @@
       (stroke (width 0.1) (type solid)) (layer "F.Fab") (tstamp 3c78cc78-2202-4710-a65a-be52fa976800))
     (fp_line (start 1 0.45) (end -1 0.45)
       (stroke (width 0.1) (type solid)) (layer "F.Fab") (tstamp b7df57b7-1e60-4c69-92a5-90e455a72dd1))
-    (pad "1" smd roundrect (at -1.15 0) (size 1.05 1.2) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.238095)
+    (pad "1" smd roundrect (at -1.15 0) (size 1.05 1.2) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.2380952381)
       (net 5 "Net-(IC2-LX)") (pinfunction "1") (pintype "passive") (tstamp 42dffdd0-0006-49a0-9bb7-c0eebadee386))
-    (pad "2" smd roundrect (at 1.15 0) (size 1.05 1.2) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.238095)
+    (pad "2" smd roundrect (at 1.15 0) (size 1.05 1.2) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.2380952381)
       (net 7 "VCC") (pinfunction "2") (pintype "passive") (tstamp f70340cb-e019-4019-a0ac-246011ff35e2))
     (model "${KICAD6_3DMODEL_DIR}/Inductor_SMD.3dshapes/L_0805_2012Metric.wrl"
       (offset (xyz 0 0 0))
@@ -1213,8 +1213,8 @@
       (net 59 "/SWCLK") (pinfunction "Pin_5") (pintype "passive") (tstamp 19e1700f-cf49-4b4d-9970-b346076a33c4))
     (pad "6" smd roundrect (at 3.125 -2.4 90) (size 0.8 1.6) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
       (net 60 "/UART_TX") (pinfunction "Pin_6") (pintype "passive") (tstamp 898a9b22-e97d-49ab-9ea9-40e8a6f17499))
-    (pad "MP" smd roundrect (at -5.675 0.5 90) (size 2.1 3) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.119048) (tstamp 73261cf0-2b17-42d3-a318-e4aa4a8aee9b))
-    (pad "MP" smd roundrect (at 5.675 0.5 90) (size 2.1 3) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.119048) (tstamp 96792128-148c-47dc-855c-febe39e90224))
+    (pad "MP" smd roundrect (at -5.675 0.5 90) (size 2.1 3) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.1190480952) (tstamp 73261cf0-2b17-42d3-a318-e4aa4a8aee9b))
+    (pad "MP" smd roundrect (at 5.675 0.5 90) (size 2.1 3) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.1190480952) (tstamp 96792128-148c-47dc-855c-febe39e90224))
     (model "${KICAD6_3DMODEL_DIR}/Connector_Molex.3dshapes/Molex_PicoBlade_53261-0671_1x06-1MP_P1.25mm_Horizontal.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
@@ -2800,9 +2800,9 @@
       (stroke (width 0.1) (type solid)) (layer "F.Fab") (tstamp be973eaa-3551-43ca-ad6f-d4d2e2a2c977))
     (fp_line (start 1 0.45) (end -1 0.45)
       (stroke (width 0.1) (type solid)) (layer "F.Fab") (tstamp 060dc040-c3bc-48b3-a64d-a38a2e30ed9d))
-    (pad "1" smd roundrect (at -1.15 0) (size 1.05 1.2) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.238095)
+    (pad "1" smd roundrect (at -1.15 0) (size 1.05 1.2) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.2380952381)
       (net 4 "Net-(IC1-LX)") (pinfunction "1") (pintype "passive") (tstamp 1c77f76b-65ff-419a-abee-33a8bb4bcdbf))
-    (pad "2" smd roundrect (at 1.15 0) (size 1.05 1.2) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.238095)
+    (pad "2" smd roundrect (at 1.15 0) (size 1.05 1.2) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.2380952381)
       (net 7 "VCC") (pinfunction "2") (pintype "passive") (tstamp 24657ab5-c3f4-432a-ad4f-1de3516d80c7))
     (model "${KICAD6_3DMODEL_DIR}/Inductor_SMD.3dshapes/L_0805_2012Metric.wrl"
       (offset (xyz 0 0 0))
@@ -3305,11 +3305,11 @@
     (tags "kb_params=eyJBbGlnbm1lbnRDaG9pY2UiOiAiQ2VudGVyIiwgIkNhcExlZnRDaG9pY2UiOiAiLyIsICJDYXBSaWdodENob2ljZSI6ICIvIiwgIkZvbnRDb21ib0JveCI6ICJtcGx1cy0xbW4tbWVkaXVtIiwgIkhlaWdodEN0cmwiOiAiMS4yIiwgIkxheWVyQ29tYm9Cb3giOiAiRi5TaWxrUyIsICJNdWx0aUxpbmVUZXh0IjogIkRFVEVDVFxyXG5JTlNFUlQiLCAiUGFkZGluZ0JvdHRvbUN0cmwiOiAiNSIsICJQYWRkaW5nTGVmdEN0cmwiOiAiNSIsICJQYWRkaW5nUmlnaHRDdHJsIjogIjUiLCAiUGFkZGluZ1RvcEN0cmwiOiAiNSIsICJXaWR0aEN0cmwiOiAiMS4yIn0=")
     (attr board_only exclude_from_pos_files exclude_from_bom)
     (fp_text reference "kibuzzard-65246046" (at 0 5.349734) (layer "B.SilkS") hide
-        (effects (font (size 0 0)) (justify mirror))
+        (effects (font (size 0 0) (thickness 0.15)) (justify mirror))
       (tstamp 966755cd-c5a1-4caf-8a61-31aa7c2a1af0)
     )
     (fp_text value "G***" (at 0 -5.349734) (layer "B.SilkS") hide
-        (effects (font (size 0 0)) (justify mirror))
+        (effects (font (size 0 0) (thickness 0.15)) (justify mirror))
       (tstamp f9e118ae-829b-4f80-bd6d-1f97091e3d56)
     )
     (fp_poly
@@ -3688,11 +3688,11 @@
     (tags "kb_params=eyJBbGlnbm1lbnRDaG9pY2UiOiAiQ2VudGVyIiwgIkNhcExlZnRDaG9pY2UiOiAiLyIsICJDYXBSaWdodENob2ljZSI6ICIvIiwgIkZvbnRDb21ib0JveCI6ICJtcGx1cy0xbW4tbWVkaXVtIiwgIkhlaWdodEN0cmwiOiAiMS4yIiwgIkxheWVyQ29tYm9Cb3giOiAiRi5TaWxrUyIsICJNdWx0aUxpbmVUZXh0IjogIkdORCIsICJQYWRkaW5nQm90dG9tQ3RybCI6ICI1IiwgIlBhZGRpbmdMZWZ0Q3RybCI6ICI1IiwgIlBhZGRpbmdSaWdodEN0cmwiOiAiNSIsICJQYWRkaW5nVG9wQ3RybCI6ICI1IiwgIldpZHRoQ3RybCI6ICIxLjIifQ==")
     (attr board_only exclude_from_pos_files exclude_from_bom)
     (fp_text reference "kibuzzard-65245FE4" (at 0 4.15925) (layer "B.SilkS") hide
-        (effects (font (size 0 0)) (justify mirror))
+        (effects (font (size 0 0) (thickness 0.15)) (justify mirror))
       (tstamp 23f74137-25b0-43de-b98f-cde51ae71fc1)
     )
     (fp_text value "G***" (at 0 -4.15925) (layer "B.SilkS") hide
-        (effects (font (size 0 0)) (justify mirror))
+        (effects (font (size 0 0) (thickness 0.15)) (justify mirror))
       (tstamp 999b9ae9-fe73-4927-b7bc-f387ba4688e0)
     )
     (fp_poly
@@ -3932,11 +3932,11 @@
     (tags "kb_params=eyJBbGlnbm1lbnRDaG9pY2UiOiAiQ2VudGVyIiwgIkNhcExlZnRDaG9pY2UiOiAiXFwiLCAiQ2FwUmlnaHRDaG9pY2UiOiAiXFwiLCAiRm9udENvbWJvQm94IjogIm1wbHVzLTFtbi1tZWRpdW0iLCAiSGVpZ2h0Q3RybCI6ICIwLjgiLCAiTGF5ZXJDb21ib0JveCI6ICJGLlNpbGtTIiwgIk11bHRpTGluZVRleHQiOiAiQVVYXHJcbkdORCIsICJQYWRkaW5nQm90dG9tQ3RybCI6ICIyIiwgIlBhZGRpbmdMZWZ0Q3RybCI6ICIyIiwgIlBhZGRpbmdSaWdodEN0cmwiOiAiMiIsICJQYWRkaW5nVG9wQ3RybCI6ICIyIiwgIldpZHRoQ3RybCI6ICIwLjgifQ==")
     (attr board_only exclude_from_pos_files exclude_from_bom)
     (fp_text reference "kibuzzard-652460C9" (at 0 4.417389) (layer "B.SilkS") hide
-        (effects (font (size 0 0)) (justify mirror))
+        (effects (font (size 0 0) (thickness 0.15)) (justify mirror))
       (tstamp 13d1ac69-c885-4d17-9f6f-52f774b585f4)
     )
     (fp_text value "G***" (at 0 -4.417389) (layer "B.SilkS") hide
-        (effects (font (size 0 0)) (justify mirror))
+        (effects (font (size 0 0) (thickness 0.15)) (justify mirror))
       (tstamp 3c903f4f-1040-49de-8e23-c783ddcaa8d6)
     )
     (fp_poly
@@ -4330,11 +4330,11 @@
     (tags "kb_params=eyJBbGlnbm1lbnRDaG9pY2UiOiAiQ2VudGVyIiwgIkNhcExlZnRDaG9pY2UiOiAiXFwiLCAiQ2FwUmlnaHRDaG9pY2UiOiAiXFwiLCAiRm9udENvbWJvQm94IjogIm1wbHVzLTFtbi1tZWRpdW0iLCAiSGVpZ2h0Q3RybCI6ICIwLjgiLCAiTGF5ZXJDb21ib0JveCI6ICJGLlNpbGtTIiwgIk11bHRpTGluZVRleHQiOiAiQVVYXHJcbkRBVEEiLCAiUGFkZGluZ0JvdHRvbUN0cmwiOiAiMiIsICJQYWRkaW5nTGVmdEN0cmwiOiAiMiIsICJQYWRkaW5nUmlnaHRDdHJsIjogIjIiLCAiUGFkZGluZ1RvcEN0cmwiOiAiMiIsICJXaWR0aEN0cmwiOiAiMC44In0=")
     (attr board_only exclude_from_pos_files exclude_from_bom)
     (fp_text reference "kibuzzard-652460F9" (at 0 4.417389) (layer "B.SilkS") hide
-        (effects (font (size 0 0)) (justify mirror))
+        (effects (font (size 0 0) (thickness 0.15)) (justify mirror))
       (tstamp df30ab56-16c0-4399-abe4-e59c479837e5)
     )
     (fp_text value "G***" (at 0 -4.417389) (layer "B.SilkS") hide
-        (effects (font (size 0 0)) (justify mirror))
+        (effects (font (size 0 0) (thickness 0.15)) (justify mirror))
       (tstamp 2eb5e165-0170-4679-b27d-83571867ba57)
     )
     (fp_poly
@@ -4552,11 +4552,11 @@
     (tags "kb_params=eyJBbGlnbm1lbnRDaG9pY2UiOiAiQ2VudGVyIiwgIkNhcExlZnRDaG9pY2UiOiAiXFwiLCAiQ2FwUmlnaHRDaG9pY2UiOiAiXFwiLCAiRm9udENvbWJvQm94IjogIm1wbHVzLTFtbi1tZWRpdW0iLCAiSGVpZ2h0Q3RybCI6ICIwLjgiLCAiTGF5ZXJDb21ib0JveCI6ICJGLlNpbGtTIiwgIk11bHRpTGluZVRleHQiOiAiM1YzIiwgIlBhZGRpbmdCb3R0b21DdHJsIjogIjIiLCAiUGFkZGluZ0xlZnRDdHJsIjogIjIiLCAiUGFkZGluZ1JpZ2h0Q3RybCI6ICIyIiwgIlBhZGRpbmdUb3BDdHJsIjogIjIiLCAiV2lkdGhDdHJsIjogIjAuOCJ9")
     (attr board_only exclude_from_pos_files exclude_from_bom)
     (fp_text reference "kibuzzard-652460F2" (at 0 3.630083) (layer "B.SilkS") hide
-        (effects (font (size 0 0)) (justify mirror))
+        (effects (font (size 0 0) (thickness 0.15)) (justify mirror))
       (tstamp ebff5f08-b956-475f-bd7f-501b86557934)
     )
     (fp_text value "G***" (at 0 -3.630083) (layer "B.SilkS") hide
-        (effects (font (size 0 0)) (justify mirror))
+        (effects (font (size 0 0) (thickness 0.15)) (justify mirror))
       (tstamp d36b010e-b04c-47bf-b302-d6a3aba53da6)
     )
     (fp_poly
@@ -4920,11 +4920,11 @@
     (tags "kb_params=eyJBbGlnbm1lbnRDaG9pY2UiOiAiQ2VudGVyIiwgIkNhcExlZnRDaG9pY2UiOiAiXFwiLCAiQ2FwUmlnaHRDaG9pY2UiOiAiXFwiLCAiRm9udENvbWJvQm94IjogIm1wbHVzLTFtbi1tZWRpdW0iLCAiSGVpZ2h0Q3RybCI6ICIwLjgiLCAiTGF5ZXJDb21ib0JveCI6ICJGLlNpbGtTIiwgIk11bHRpTGluZVRleHQiOiAiQVVYXHJcbkRFVEVDVCIsICJQYWRkaW5nQm90dG9tQ3RybCI6ICIyIiwgIlBhZGRpbmdMZWZ0Q3RybCI6ICIyIiwgIlBhZGRpbmdSaWdodEN0cmwiOiAiMiIsICJQYWRkaW5nVG9wQ3RybCI6ICIyIiwgIldpZHRoQ3RybCI6ICIwLjgifQ==")
     (attr board_only exclude_from_pos_files exclude_from_bom)
     (fp_text reference "kibuzzard-652460E7" (at 0 4.417389) (layer "B.SilkS") hide
-        (effects (font (size 0 0)) (justify mirror))
+        (effects (font (size 0 0) (thickness 0.15)) (justify mirror))
       (tstamp 20995968-0800-464f-9ca1-559d2fb8729c)
     )
     (fp_text value "G***" (at 0 -4.417389) (layer "B.SilkS") hide
-        (effects (font (size 0 0)) (justify mirror))
+        (effects (font (size 0 0) (thickness 0.15)) (justify mirror))
       (tstamp 657fe9b1-a289-4b65-88ae-e27f13316cd9)
     )
     (fp_poly
