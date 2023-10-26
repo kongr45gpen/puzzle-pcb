@@ -21,7 +21,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "../../Drivers/SSD1306/ssd1306.h"
+#include "../../Drivers/SSD1306/ssd1306_tests.h"
+#include "images.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -96,6 +98,11 @@ int main(void)
   MX_ICACHE_Init();
   /* USER CODE BEGIN 2 */
   int loops = 0;
+  enum Status {
+      ERREUR,
+      ROCKET
+  };
+    enum Status status = ERREUR;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -114,8 +121,9 @@ int main(void)
         HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
         HAL_GPIO_TogglePin(LED5_GPIO_Port, LED5_Pin);
         HAL_Delay(200);
-    } else if (loops > 30) {
+    } else if (loops > 70) {
         loops = 0;
+        status = ERREUR;
 
         HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
         HAL_GPIO_WritePin(LED6_GPIO_Port, LED6_Pin, GPIO_PIN_SET);
@@ -128,13 +136,37 @@ int main(void)
 
         // Open green ones
         HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
+
+        status = ROCKET;
     } else {
-        HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
-        HAL_GPIO_TogglePin(LED6_GPIO_Port, LED6_Pin);
-        HAL_Delay(200);
+        if (loops % 3 == 0) {
+            HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
+            HAL_GPIO_TogglePin(LED6_GPIO_Port, LED6_Pin);
+        }
+        HAL_Delay(20);
     }
 
-      loops++;
+    if (loops % 4 == 0 && status == ERREUR) {
+        ssd1306_Init();
+    }
+
+    if (status == ERREUR && loops % 4 == 0) {
+        ssd1306_SetCursor(30, 46);
+        ssd1306_WriteString("ERROR", Font_11x18, White);
+        ssd1306_DrawBitmap(40, 0, warning_48x48, 48, 48, White);
+
+        ssd1306_UpdateScreen();
+    } else if (status == ROCKET) {
+        int64_t pseudorandom1 = (int64_t) ((double)loops * (double)loops * 164641.73f);
+        int64_t pseudorandom2 = (int64_t) ((double)loops * (double)loops * 3046751.73f);
+
+        ssd1306_Fill(Black);
+        ssd1306_DrawBitmap(35 - 10 + (pseudorandom1 % 16), pseudorandom2 % 6, rocket_58x58, 58, 58, White);
+
+        ssd1306_UpdateScreen();
+    }
+
+    loops++;
   }
   /* USER CODE END 3 */
 }
@@ -199,7 +231,7 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.Timing = 0x00008BFF;
+  hi2c1.Init.Timing = 0x00000004;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
