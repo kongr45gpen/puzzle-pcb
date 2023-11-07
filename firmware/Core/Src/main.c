@@ -28,7 +28,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+#include "math.h"
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -44,6 +44,8 @@
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
 
+TIM_HandleTypeDef htim2;
+
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
@@ -56,6 +58,7 @@ static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_ICACHE_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -96,13 +99,22 @@ int main(void)
   MX_I2C1_Init();
   MX_USART2_UART_Init();
   MX_ICACHE_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   int loops = 0;
+  uint32_t lastTime = 0;
   enum Status {
       ERREUR,
       ROCKET
   };
     enum Status status = ERREUR;
+
+    enum PCBStatus {
+        PLUGGED,
+        UNPLUGGED
+    };
+    enum PCBStatus oldStatus = PLUGGED;
+    enum PCBStatus pcbStatus = UNPLUGGED;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -112,59 +124,145 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    if (loops < 5) {
-        HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
-        HAL_Delay(30);
-        HAL_GPIO_TogglePin(LED5_GPIO_Port, LED5_Pin);
-        HAL_Delay(200);
 
-        HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
-        HAL_GPIO_TogglePin(LED5_GPIO_Port, LED5_Pin);
-        HAL_Delay(200);
-    } else if (loops > 70) {
-        loops = 0;
-        status = ERREUR;
+      HAL_TIM_Base_Start(&htim2);
 
-        HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
-        HAL_GPIO_WritePin(LED6_GPIO_Port, LED6_Pin, GPIO_PIN_SET);
-        HAL_GPIO_WritePin(LED5_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
-        HAL_GPIO_WritePin(LED5_GPIO_Port, LED5_Pin, GPIO_PIN_SET);
-    } else if (loops == 5) {
-        // Turn them off
-        HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
-        HAL_GPIO_WritePin(LED5_GPIO_Port, LED5_Pin, GPIO_PIN_SET);
-
-        // Open green ones
-        HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
-
-        status = ROCKET;
+    if (!HAL_GPIO_ReadPin(DETECT_INSERT_GPIO_Port, DETECT_INSERT_Pin)) {
+        pcbStatus = PLUGGED;
     } else {
+        pcbStatus = UNPLUGGED;
+    }
+
+    // PCB status changed!
+    if (oldStatus != pcbStatus) {
+        oldStatus = pcbStatus;
+        loops = 0;
+        lastTime = HAL_GetTick();
+
+        // Turn off all leds
+        leds_off();
+
+        // Clear screen
+        ssd1306_Fill(Black);
+        ssd1306_UpdateScreen();
+
+        // Stop any sound
+        stop_sound();
+    }
+
+    if (pcbStatus == PLUGGED) {
+        const int startSoundDelay = 20;
+        if (loops == startSoundDelay + 3) {
+            start_sound(400 * powf(2, 7.0f / 12.0f));
+        } else if (loops == startSoundDelay + 8) {
+            stop_sound();
+        } else if (loops == startSoundDelay + 13) {
+            start_sound(400 * powf(2, 7.0f / 12.0f));
+        } else if (loops >= startSoundDelay + 18) {
+            stop_sound();
+        }
+
         if (loops % 3 == 0) {
-            HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
-            HAL_GPIO_TogglePin(LED6_GPIO_Port, LED6_Pin);
+            static int the_led = 0;
+            the_led = (the_led + 1) % 3;
+
+            HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, the_led == 0 ? GPIO_PIN_RESET : GPIO_PIN_SET);
+            HAL_GPIO_WritePin(LED6_GPIO_Port, LED6_Pin, the_led == 1 ? GPIO_PIN_RESET : GPIO_PIN_SET);
+            HAL_GPIO_WritePin(LED9_GPIO_Port, LED9_Pin, the_led == 2 ? GPIO_PIN_RESET : GPIO_PIN_SET);
+        }
+
+        HAL_Delay(20);
+    } else { // UNPLUGGED
+
+        const int sleepDelay = 100;
+
+        if (loops >= sleepDelay) {
+            sleep();
+            continue;
+        }
+
+        if (loops == 3) {
+            start_sound(400);
+        } else if (loops == 12) {
+            stop_sound();
+        } else if (loops == 20) {
+            start_sound(400 * powf(2, 3.0f / 12.0f));
+        } else if (loops == 30) {
+            start_sound(400 * powf(2, -3.0f / 12.0f));
+        } else if (loops >= 40) {
+            stop_sound();
+        }
+
+
+        if (loops % 3 == 0) {
+            HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
+            HAL_GPIO_TogglePin(LED5_GPIO_Port, LED5_Pin);
         }
         HAL_Delay(20);
     }
 
-    if (loops % 4 == 0 && status == ERREUR) {
-        ssd1306_Init();
+    if (HAL_GPIO_ReadPin(DETECT_INSERT_GPIO_Port, DETECT_INSERT_Pin)) {
+
     }
 
-    if (status == ERREUR && loops % 4 == 0) {
-        ssd1306_SetCursor(30, 46);
-        ssd1306_WriteString("ERROR", Font_11x18, White);
-        ssd1306_DrawBitmap(40, 0, warning_48x48, 48, 48, White);
-
-        ssd1306_UpdateScreen();
-    } else if (status == ROCKET) {
-        int64_t pseudorandom1 = (int64_t) ((double)loops * (double)loops * 164641.73f);
-        int64_t pseudorandom2 = (int64_t) ((double)loops * (double)loops * 3046751.73f);
-
-        ssd1306_Fill(Black);
-        ssd1306_DrawBitmap(35 - 10 + (pseudorandom1 % 16), pseudorandom2 % 6, rocket_58x58, 58, 58, White);
-
-        ssd1306_UpdateScreen();
-    }
+//    if (HAL_GPIO_ReadPin(DETECT_INSERT_GPIO_Port, DETECT_INSERT_Pin)) {
+//        HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
+//        HAL_GPIO_WritePin(LED6_GPIO_Port, LED6_Pin, GPIO_PIN_SET);
+//        HAL_GPIO_WritePin(LED5_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
+//        HAL_GPIO_WritePin(LED5_GPIO_Port, LED5_Pin, GPIO_PIN_SET);
+//
+//        HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
+//        HAL_Delay(30);
+//        HAL_GPIO_TogglePin(LED5_GPIO_Port, LED5_Pin);
+//        HAL_Delay(200);
+//
+//        HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
+//        HAL_GPIO_TogglePin(LED5_GPIO_Port, LED5_Pin);
+//        HAL_Delay(200);
+//    } else {
+//        status = ERREUR;
+//
+//        if (loops % 3 == 0) {
+//            HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
+//            HAL_GPIO_TogglePin(LED6_GPIO_Port, LED6_Pin);
+//        }
+//        HAL_Delay(20);
+//    } //else if (loops == 5) {
+//        // Turn them off
+//        HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
+//        HAL_GPIO_WritePin(LED5_GPIO_Port, LED5_Pin, GPIO_PIN_SET);
+//
+//        // Open green ones
+//        HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
+//
+//        status = ROCKET;
+//    } else {
+//        if (loops % 3 == 0) {
+//            HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
+//            HAL_GPIO_TogglePin(LED6_GPIO_Port, LED6_Pin);
+//        }
+//        HAL_Delay(20);
+//    }
+//
+//    if (loops % 4 == 0 && status == ERREUR) {
+//        ssd1306_Init();
+//    }
+//
+//    if (status == ERREUR && loops % 4 == 0) {
+//        ssd1306_SetCursor(30, 46);
+//        ssd1306_WriteString("ERROR", Font_11x18, White);
+//        ssd1306_DrawBitmap(40, 0, warning_48x48, 48, 48, White);
+//
+//        ssd1306_UpdateScreen();
+//    } else if (status == ROCKET) {
+//        int64_t pseudorandom1 = (int64_t) ((double)loops * (double)loops * 164641.73f);
+//        int64_t pseudorandom2 = (int64_t) ((double)loops * (double)loops * 3046751.73f);
+//
+//        ssd1306_Fill(Black);
+//        ssd1306_DrawBitmap(35 - 10 + (pseudorandom1 % 16), pseudorandom2 % 6, rocket_58x58, 58, 58, White);
+//
+//        ssd1306_UpdateScreen();
+//    }
 
     loops++;
   }
@@ -296,6 +394,55 @@ static void MX_ICACHE_Init(void)
 }
 
 /**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 0;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 10000;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 400;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+  HAL_TIM_MspPostInit(&htim2);
+
+}
+
+/**
   * @brief USART2 Initialization Function
   * @param None
   * @retval None
@@ -359,18 +506,21 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(BUZZER_OUT_GPIO_Port, BUZZER_OUT_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LED7_GPIO_Port, LED7_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, LED3_Pin|LED4_Pin|LED1_Pin|LED2_Pin
                           |LED5_Pin|LED6_Pin, GPIO_PIN_SET);
 
-  /*Configure GPIO pin : BUZZER_OUT_Pin */
-  GPIO_InitStruct.Pin = BUZZER_OUT_Pin;
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, LED8_Pin|LED9_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : LED7_Pin */
+  GPIO_InitStruct.Pin = LED7_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(BUZZER_OUT_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(LED7_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LED3_Pin LED4_Pin LED1_Pin LED2_Pin
                            LED5_Pin LED6_Pin */
@@ -380,6 +530,23 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : LED8_Pin LED9_Pin */
+  GPIO_InitStruct.Pin = LED8_Pin|LED9_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : DETECT_INSERT_Pin */
+  GPIO_InitStruct.Pin = DETECT_INSERT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(DETECT_INSERT_GPIO_Port, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI12_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI12_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
