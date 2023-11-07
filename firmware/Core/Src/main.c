@@ -15,6 +15,7 @@
   *
   ******************************************************************************
   */
+#define SSD1306_MIRROR_VERT
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -171,6 +172,14 @@ int main(void)
             HAL_GPIO_WritePin(LED9_GPIO_Port, LED9_Pin, the_led == 2 ? GPIO_PIN_RESET : GPIO_PIN_SET);
         }
 
+        int64_t pseudorandom1 = (int64_t) ((double)loops * (double)loops * 164641.73f);
+        int64_t pseudorandom2 = (int64_t) ((double)loops * (double)loops * 3046751.73f);
+
+        ssd1306_Fill(Black);
+        ssd1306_DrawBitmap(35 - 10 + (pseudorandom1 % 16), pseudorandom2 % 6, rocket_58x58, 58, 58, White);
+
+        ssd1306_UpdateScreen();
+
         HAL_Delay(20);
     } else { // UNPLUGGED
 
@@ -193,6 +202,15 @@ int main(void)
             stop_sound();
         }
 
+        if (loops <= 1) {
+            ssd1306_Init();
+
+            ssd1306_SetCursor(27, 47);
+            ssd1306_WriteString("ERROR", Font_11x18, White);
+            ssd1306_DrawBitmap(40, 0, warning_48x48, 48, 48, White);
+
+            ssd1306_UpdateScreen();
+        }
 
         if (loops % 3 == 0) {
             HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
