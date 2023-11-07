@@ -216,7 +216,12 @@ int main(void)
         brightness *= 4095 / 3;
 
         if (loops >= sleepDelay) {
+            stop_everything();
+            // Disable systick so that it doesn't wake up the processor every ms and doesn't keep counting.
+            // Hopefully will prevent some battery drain.
+            HAL_NVIC_DisableIRQ(SysTick_IRQn);
             sleep();
+            HAL_NVIC_EnableIRQ(SysTick_IRQn);
             continue;
         }
 

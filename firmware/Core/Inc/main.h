@@ -159,14 +159,16 @@ inline void start_sound(float frequency) {
     HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_1);
 }
 
-inline void sleep() {
+inline void stop_everything() {
     leds_off();
 
     ssd1306_Fill(Black);
     ssd1306_UpdateScreen();
 
     stop_sound();
+}
 
+inline void sleep() {
     HAL_PWR_EnterSLEEPMode(PWR_LOWPOWERREGULATOR_ON, PWR_SLEEPENTRY_WFI);
 }
 
