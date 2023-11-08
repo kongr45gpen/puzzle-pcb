@@ -30,11 +30,14 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 #include "math.h"
+#include "stdbool.h"
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+const int startSoundDelay = 7;
+const int stopSoundDelay = 15;
+const int sleepDelay = 100;
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -128,6 +131,10 @@ int main(void)
     };
     enum PCBStatus oldStatus = PLUGGED;
     enum PCBStatus pcbStatus = UNPLUGGED;
+
+    bool screenConnected = false;
+    bool mustUpdateScreen = false;
+    bool debouncedStart = true;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -138,26 +145,47 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-      HAL_TIM_Base_Start(&htim2);
-      HAL_TIM_Base_Start(&htim3);
-        HAL_TIM_Base_Start(&htim4);
-        HAL_TIM_Base_Start(&htim5);
+    HAL_TIM_Base_Start(&htim2);
+    HAL_TIM_Base_Start(&htim3);
+    HAL_TIM_Base_Start(&htim4);
+    HAL_TIM_Base_Start(&htim5);
     HAL_TIM_Base_Start(&htim15);
 
-      HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-        HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-            HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
-            HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
-      HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
-      HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
-      HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
-      HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_1);
-      HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_2);
+    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
+    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
+    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
+    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
+    HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_1);
+    HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_2);
 
     if (!HAL_GPIO_ReadPin(DETECT_INSERT_GPIO_Port, DETECT_INSERT_Pin)) {
         pcbStatus = PLUGGED;
     } else {
         pcbStatus = UNPLUGGED;
+    }
+
+    if (is_screen_connected()) {
+        if (!screenConnected) {
+            ssd1306_Init();
+            ssd1306_Fill(Black);
+            ssd1306_UpdateScreen();
+            mustUpdateScreen = true;
+        }
+        screenConnected = true;
+    } else {
+        screenConnected = false;
+    }
+
+    if (oldStatus != pcbStatus && pcbStatus == UNPLUGGED) {
+        //debounce
+        HAL_Delay(100);
+        if (!HAL_GPIO_ReadPin(DETECT_INSERT_GPIO_Port, DETECT_INSERT_Pin)) {
+            // Plugged
+            continue;
+        }
     }
 
     // PCB status changed!
@@ -178,14 +206,29 @@ int main(void)
     }
 
     if (pcbStatus == PLUGGED) {
-        const int startSoundDelay = 20;
+        if (loops < startSoundDelay) {
+            set_led(LED1B, 50);
+            set_led(LED2B, 100);
+            set_led(LED3B, 200);
+            // DEBOUNCING
+            HAL_Delay(100);
+            loops++;
+            debouncedStart = false;
+            continue;
+        } else {
+            set_led(LED1B, 0);
+            set_led(LED2B, 0);
+            set_led(LED3B, 0);
+            debouncedStart = true;
+        }
+
         if (loops == startSoundDelay + 3) {
             start_sound(400 * powf(2, 7.0f / 12.0f));
-        } else if (loops == startSoundDelay + 8) {
+        } else if (loops == startSoundDelay + 6) {
             stop_sound();
-        } else if (loops == startSoundDelay + 13) {
+        } else if (loops == startSoundDelay + 9) {
             start_sound(400 * powf(2, 7.0f / 12.0f));
-        } else if (loops >= startSoundDelay + 18) {
+        } else if (loops >= startSoundDelay + 12) {
             stop_sound();
         }
 
@@ -193,9 +236,9 @@ int main(void)
             static int the_led = 0;
             the_led = (the_led + 1) % 3;
 
-            set_led(LED1G, the_led == 0 ? 200 : 0);
-            set_led(LED2G, the_led == 1 ? 200 : 0);
-            set_led(LED3G, the_led == 2 ? 200 : 0);
+            set_led(LED1G, the_led == 0 ? 1000 : 0);
+            set_led(LED2G, the_led == 1 ? 1000 : 0);
+            set_led(LED3G, the_led == 2 ? 1000 : 0);
         }
 
         int64_t pseudorandom1 = (int64_t) ((double)loops * (double)loops * 164641.73f);
@@ -209,13 +252,12 @@ int main(void)
         HAL_Delay(20);
     } else { // UNPLUGGED
 
-        const int sleepDelay = 100;
         float brightness = (1 - (float)loops / (float)sleepDelay);
         // gamma correction
         brightness = powf(brightness, 2.f);
         brightness *= 4095 / 3;
 
-        if (loops >= sleepDelay) {
+        if (loops >= sleepDelay || !debouncedStart) {
             stop_everything();
             // Disable systick so that it doesn't wake up the processor every ms and doesn't keep counting.
             // Hopefully will prevent some battery drain.
@@ -225,26 +267,26 @@ int main(void)
             continue;
         }
 
-        if (loops == 3) {
+        if (loops == stopSoundDelay + 3) {
             start_sound(400);
-        } else if (loops == 12) {
+        } else if (loops == stopSoundDelay + 12) {
             stop_sound();
-        } else if (loops == 20) {
+        } else if (loops == stopSoundDelay + 20) {
             start_sound(400 * powf(2, 3.0f / 12.0f));
-        } else if (loops == 30) {
+        } else if (loops == stopSoundDelay + 30) {
             start_sound(400 * powf(2, -3.0f / 12.0f));
-        } else if (loops >= 40) {
+        } else if (loops >= stopSoundDelay + 40) {
             stop_sound();
         }
 
-        if (loops <= 1) {
-            ssd1306_Init();
-
-            ssd1306_SetCursor(27, 47);
+        if (loops <= 1 || mustUpdateScreen) {
+            ssd1306_SetCursor(30, 46);
             ssd1306_WriteString("ERROR", Font_11x18, White);
             ssd1306_DrawBitmap(40, 0, warning_48x48, 48, 48, White);
 
             ssd1306_UpdateScreen();
+
+            mustUpdateScreen = false;
         }
 
         if (loops % 4 == 0) {
@@ -257,9 +299,9 @@ int main(void)
         HAL_Delay(20);
     }
 
-    if (HAL_GPIO_ReadPin(DETECT_INSERT_GPIO_Port, DETECT_INSERT_Pin)) {
-
-    }
+//    if (HAL_GPIO_ReadPin(DETECT_INSERT_GPIO_Port, DETECT_INSERT_Pin)) {
+//
+//    }
 
 //    if (HAL_GPIO_ReadPin(DETECT_INSERT_GPIO_Port, DETECT_INSERT_Pin)) {
 //        HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);

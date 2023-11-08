@@ -155,7 +155,7 @@ inline void start_sound(float frequency) {
     // point
 //    htim2.Instance->CCR1 = htim2.Instance->ARR / 2; // duty cycle
     // DUTY CYCLE OF PSEAKER PWM
-    htim5.Instance->CCR1 = 30;
+    htim5.Instance->CCR1 = 200;
     HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_1);
 }
 
@@ -166,6 +166,13 @@ inline void stop_everything() {
     ssd1306_UpdateScreen();
 
     stop_sound();
+}
+
+inline int is_screen_connected() {
+    uint8_t byte = 0xE3; // NOP command
+    HAL_StatusTypeDef status = HAL_I2C_Mem_Write(&SSD1306_I2C_PORT, SSD1306_I2C_ADDR, 0x00, 1, &byte, 1, 10);
+
+    return status == HAL_OK;
 }
 
 inline void sleep() {
